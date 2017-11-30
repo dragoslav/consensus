@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Node Consensus</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+          integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+</head>
+<style type="text/css">
+    body {
+        padding-top: 1rem;
+    }
+    canvas {
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+    .form-row {
+        padding-top: 0.5rem;
+    }
+    .row-brake {
+        padding-top: 1.5rem;
+    }
+</style>
+<body>
+
+<main role="main" class="container">
+
+    <div class="row">
+        <div class="col-sm col-sm-4">
+            <div class="row form-row">
+                <button type="button" class="btn btn-primary btn-block" id="buttonRun" disabled>Run Simulation</button>
+            </div>
+            <div class="row form-row">
+                <div class="input-group" data-toggle="tooltip" data-placement="bottom"
+                     title="Random number generator, leave it empty for time based seed.">
+                    <span class="input-group-addon col-6" id="basic-addon1">seed</span>
+                    <input type="number" class="form-control col-6" id="seed" placeholder="" value="0"
+                           aria-label="seed" aria-describedby="basic-addon1">
+                </div>
+            </div>
+            <div class="row form-row">
+                <div class="input-group" data-toggle="tooltip" data-placement="bottom" title="Number of rounds to run.">
+                    <span class="input-group-addon col-6" id="basic-addon2">rounds</span>
+                    <input type="number" class="form-control col-6" id="rounds" placeholder="10" value="10" min="1"
+                           aria-label="rounds" aria-describedby="basic-addon2">
+                </div>
+            </div>
+            <div class="row form-row">
+                <div class="input-group" data-toggle="tooltip" data-placement="bottom" title="Total number of nodes.">
+                    <span class="input-group-addon col-6" id="basic-addon3"># nodes</span>
+                    <input type="number" class="form-control col-6" id="nn" placeholder="100" min="1" value="100"
+                           aria-label="# nodes" aria-describedby="basic-addon3">
+                </div>
+            </div>
+            <div class="row form-row">
+                <div class="input-group" data-toggle="tooltip" data-placement="bottom"
+                     title="Total number of unique messages.">
+                    <span class="input-group-addon col-6" id="basic-addon4"># messages</span>
+                    <input type="number" class="form-control col-6" id="nm" placeholder="500" min="1" value="500"
+                           aria-label="# messages" aria-describedby="basic-addon4">
+                </div>
+            </div>
+            <div class="row form-row">
+                <div class="input-group" data-toggle="tooltip" data-placement="bottom"
+                     title="Probability of an edge between nodes.">
+                    <span class="input-group-addon col-6" id="basic-addon5">connection %</span>
+                    <input type="number" class="form-control col-6" id="cp" placeholder="0.1"
+                           min="0.01" value="0.1" step="0.01" max="1"
+                           aria-label="connection %" aria-describedby="basic-addon5">
+                </div>
+            </div>
+            <div class="row form-row">
+                <div class="input-group" data-toggle="tooltip" data-placement="bottom"
+                     title="Probability of an erroneous node.">
+                    <span class="input-group-addon col-6" id="basic-addon6">error %</span>
+                    <input type="number" class="form-control col-6" id="ep" placeholder="0.3"
+                           min="0" value="0.3" step="0.01" max="1"
+                           aria-label="error %" aria-describedby="basic-addon6">
+                </div>
+            </div>
+            <div class="row form-row">
+                <div class="input-group" data-toggle="tooltip" data-placement="bottom"
+                     title="Percentage of messages initially distributed per node.">
+                    <span class="input-group-addon col-6" id="basic-addon7">message %</span>
+                    <input type="number" class="form-control col-6" id="mp"
+                           placeholder="0.01" min="0.001" value="0.01" step="0.001" max="1"
+                           aria-label="message %" aria-describedby="basic-addon7">
+                </div>
+            </div>
+
+            <div class="row form-row row-brake">
+                <div class="form-group col-12">
+                    <label for="cn">Compliant Node</label>
+                    <select id="cn" class="form-control" aria-label="compliant node">
+                        <option value="0">Collect Only</option>
+                        <option value="1">Collect/Reduce</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row form-row">
+                <div class="form-group col-12">
+                    <label>Erroneous Nodes</label>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="en0">
+                            Quiet
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="en1">
+                            Send Initial Only
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="en2">
+                            Send One Each Round
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="checkbox" id="en3" checked>
+                            Flush at Finish
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm col-sm-8">
+            <div class="row">
+                <canvas id="nodeCanvas"></canvas>
+            </div>
+            <div class="row">
+                <canvas id="messageCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+        integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+        integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+        crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js"></script>
+<script type="text/javascript" src="consensus.js"></script>
+<script type="text/javascript">
+
+         let config = {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: "",
+                    backgroundColor: '',
+                    borderColor: '',
+                    data: [],
+                    fill: false,
+                    lineTension: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                title:{
+                    display: false,
+                    text:''
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Round'
+                        }
+                    }],
+                    yAxes: [{
+                        id: '1',
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: ''
+                        },
+                        stacked: true
+                    }]
+                }
+            }
+        };
+
+        let rounds;
+        let simulator;
+        let currentRound;
+        let running = false;
+
+        let nodeChartConfig = JSON.parse(JSON.stringify(config));
+        nodeChartConfig.data.datasets[0].label = '# Nodes with Consensus';
+        nodeChartConfig.data.datasets[0].borderColor = 'rgb(54, 162, 235)';
+        nodeChartConfig.data.datasets[0].backgroundColor = 'rgb(54, 162, 235)';
+        nodeChartConfig.options.scales.yAxes[0].scaleLabel.labelString = '# Nodes';
+
+        let messageChartConfig = JSON.parse(JSON.stringify(config));
+        messageChartConfig.data.datasets[0].label = '# Consensus Messages';
+        messageChartConfig.data.datasets[0].borderColor = 'rgb(75, 192, 192)';
+        messageChartConfig.data.datasets[0].backgroundColor = 'rgb(75, 192, 192)';
+        messageChartConfig.options.scales.yAxes[0].scaleLabel.labelString = '# Messages';
+
+        function run() {
+            rndSeed = $('#seed').val() || Date.now();
+            rounds = $('#rounds').val() || 10;
+            numberOfNodes = $('#nn').val() || 100;
+            numberOfMessages = $('#nm').val() || 500;
+            connectionProbability = $('#cp').val() || 0.1;
+            erroneousNodeProbability = $('#ep').val() || 0.3;
+            initialMessageDistributionProbability = $('#mp').val() || 0.01;
+            compliantNode = $('#cn').val() || 0;
+
+            erroneousNodes = [];
+            for (let i = 0; i < 4; i++)
+                if ($('#en' + i).prop('checked')) erroneousNodes.push(i);
+
+            if (erroneousNodes.length === 0) erroneousNodeProbability = 0;
+
+            currentRound = 0;
+            simulator = new JsSimulator(rndSeed, rounds, numberOfNodes, numberOfMessages, connectionProbability,
+                erroneousNodeProbability, initialMessageDistributionProbability, compliantNode, erroneousNodes);
+
+            nodeChartConfig.data.labels.length = 0;
+            messageChartConfig.data.labels.length = 0;
+            nodeChartConfig.data.datasets[0].data.length = 0;
+            messageChartConfig.data.datasets[0].data.length = 0;
+
+            for (let i = 1; i <= rounds; i++) {
+              nodeChartConfig.data.labels.push(i);
+              messageChartConfig.data.labels.push(i);
+            }
+
+            window.nodeChart.update(0);
+            window.messageChart.update(0);
+
+            running = true;
+
+            update();
+        }
+
+        function update() {
+            setTimeout(function() {
+                let next = simulator.next();
+                nodeChartConfig.data.datasets[0].data.push(next[0]);
+                messageChartConfig.data.datasets[0].data.push(next[1]);
+
+                window.nodeChart.update(0);
+                window.messageChart.update(0);
+
+                if (currentRound++ <= rounds)
+                    update();
+                else
+                    finished();
+            }, 0);
+        }
+
+        function finished() {
+            running = false;
+            document.getElementById('buttonRun').disabled = false;
+            addHistory();
+        }
+
+        function addHistory() {
+            let index = location.href.indexOf('?');
+            let url = index >= 0 ? location.href.substring(0, index) : url = location.href;
+
+            let params = [];
+            params.push('seed=' + $('#seed').val());
+            params.push('rounds=' + $('#rounds').val());
+            params.push('nn=' + $('#nn').val());
+            params.push('nm=' + $('#nm').val());
+            params.push('cp=' + $('#cp').val());
+            params.push('ep=' + $('#ep').val());
+            params.push('mp=' + $('#mp').val());
+            params.push('cn=' + $('#cn').val());
+
+            let erroneousNodes = [];
+            for (let i = 0; i < 4; i++)
+                if ($('#en' + i).prop('checked')) erroneousNodes.push(i);
+
+            params.push('en=' + erroneousNodes.join(','));
+
+            if (JSON.stringify(history.state) !== JSON.stringify(params))
+                history.pushState(params, document.title, url + '?' + params.join('&'));
+        }
+
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        function updateConfiguration() {
+            ['seed', 'rounds', 'nn', 'nm', 'cp', 'ep', 'mp'].forEach(function(input) {
+                let formInput = $('#' + input);
+                formInput.on('input', function() {
+                  let button = $('#buttonRun');
+                  button.prop('disabled', running || !formInput[0].validity.valid);
+                });
+
+                let value = getParameterByName(input);
+                if (value) formInput.val(value);
+            });
+
+            let cnValue = getParameterByName('cn');
+            if (cnValue) $('#cn').val(cnValue);
+
+            let enValue = getParameterByName('en');
+            if (enValue) {
+                for (let i = 0; i < 5; i++)
+                    $('#en' + i).prop('checked', false);
+                enValue.split(',').forEach(function (index) {
+                    $('#en' + index).prop('checked', true);
+                });
+            }
+        }
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+
+            $('#buttonRun').click(function(e) {
+                e.target.disabled = true;
+                run();
+            });
+
+            updateConfiguration();
+
+            window.nodeChart = new Chart($('#nodeCanvas')[0].getContext("2d"), nodeChartConfig);
+            window.messageChart = new Chart($('#messageCanvas')[0].getContext("2d"), messageChartConfig);
+
+            window.onpopstate = function(event) {
+              updateConfiguration();
+              if (!running) run();
+            };
+
+            run();
+        });
+</script>
+
+</body>
+</html>
