@@ -1,10 +1,10 @@
-package nl.lpdiy.consensus.node
+package nl.lpdiy.consensus.agent
 
-import nl.lpdiy.consensus.{ Environment, Message, Node }
+import nl.lpdiy.consensus.{ Environment, Message, Agent }
 
 import scala.collection.mutable
 
-class FlushAtFinish extends Node {
+class FlushAtFinish extends Agent {
 
   private var round = 0
   private var environment: Environment = _

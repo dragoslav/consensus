@@ -2,7 +2,7 @@ package nl.lpdiy.consensus
 
 import java.util.Random
 
-import nl.lpdiy.consensus.node._
+import nl.lpdiy.consensus.agent._
 
 import scala.scalajs.js.annotation.{ JSExport, JSExportTopLevel }
 import scala.scalajs.js.{ Array ⇒ JsArray }
@@ -11,51 +11,51 @@ import scala.scalajs.js.{ Array ⇒ JsArray }
 class JsSimulator(
     seed:                                  Int,
     numberOfRounds:                        Int,
-    numberOfNodes:                         Int,
+    numberOfAgents:                        Int,
     numberOfMessages:                      Int,
     connectionProbability:                 Double,
-    erroneousNodeProbability:              Double,
+    erroneousAgentProbability:             Double,
     initialMessageDistributionProbability: Double,
-    compliantNode:                         Int,
-    erroneousNodes:                        JsArray[Int]
+    compliantAgent:                        Int,
+    erroneousAgents:                       JsArray[Int]
 ) {
 
-  private val buildCompliantNode: () ⇒ Node = () ⇒ compliantNode match {
-    case 0 ⇒ new CollectCompliantNode
-    case 1 ⇒ new CollectReduceCompliantNode
+  private val buildCompliantAgent: () ⇒ Agent = () ⇒ compliantAgent match {
+    case 0 ⇒ new CollectCompliantAgent
+    case 1 ⇒ new CollectReduceCompliantAgent
     case _ ⇒ throw new UnsupportedOperationException
   }
 
-  private val buildErroneousNode: () ⇒ Node = {
-    val randomErroneousNode = new Random(seed)
+  private val buildErroneousAgent: () ⇒ Agent = {
+    val randomErroneousAgent = new Random(seed)
 
-    val erroneousNodeBuilders = erroneousNodes.map {
-      case 0 ⇒ () ⇒ new QuietNode
-      case 1 ⇒ () ⇒ new RepeatInitMessagesNode
+    val erroneousAgentBuilders = erroneousAgents.map {
+      case 0 ⇒ () ⇒ new QuietAgent
+      case 1 ⇒ () ⇒ new RepeatInitMessagesAgent
       case 2 ⇒ () ⇒ new AddOneEachRound
       case 3 ⇒ () ⇒ new FlushAtFinish
       case _ ⇒ throw new UnsupportedOperationException
     }
 
-    () ⇒ erroneousNodeBuilders(randomErroneousNode.nextInt(erroneousNodeBuilders.size))()
+    () ⇒ erroneousAgentBuilders(randomErroneousAgent.nextInt(erroneousAgentBuilders.size))()
   }
 
   private val simulation = new Simulation(
     randomGenerator = new Random(seed),
-    numberOfNodes = numberOfNodes,
+    numberOfAgents = numberOfAgents,
     numberOfMessages = numberOfMessages,
-    nodeConfig = Environment(
+    agentConfig = Environment(
       connectionProbability = connectionProbability,
-      erroneousNodeProbability = erroneousNodeProbability,
+      erroneousAgentProbability = erroneousAgentProbability,
       initialMessageDistributionProbability = initialMessageDistributionProbability,
       numberOfRounds = numberOfRounds
     ),
-    nodeBuilder = new SimulationNodeBuilder(buildCompliantNode, buildErroneousNode)
+    agentBuilder = new SimulationAgentBuilder(buildCompliantAgent, buildErroneousAgent)
   )
 
   @JSExport
   def next(): JsArray[Int] = {
     val result = simulation.next()
-    JsArray(result.numberOfNodes, result.messages.size)
+    JsArray(result.numberOfAgents, result.messages.size)
   }
 }

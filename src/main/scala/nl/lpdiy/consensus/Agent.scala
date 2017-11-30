@@ -1,6 +1,6 @@
 package nl.lpdiy.consensus
 
-trait Node {
+trait Agent {
 
   def initialize(environment: Environment, initialMessages: Set[Message])
 
@@ -11,12 +11,12 @@ trait Node {
 
 case class Environment(
     connectionProbability:                 Double,
-    erroneousNodeProbability:              Double,
+    erroneousAgentProbability:             Double,
     initialMessageDistributionProbability: Double,
     numberOfRounds:                        Int
 ) {
   assert(connectionProbability >= 0 && connectionProbability <= 1)
-  assert(erroneousNodeProbability >= 0 && erroneousNodeProbability <= 1)
+  assert(erroneousAgentProbability >= 0 && erroneousAgentProbability <= 1)
   assert(initialMessageDistributionProbability >= 0 && initialMessageDistributionProbability <= 1)
   assert(numberOfRounds > 0)
 }

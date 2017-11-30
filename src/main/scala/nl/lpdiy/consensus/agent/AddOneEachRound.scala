@@ -1,8 +1,8 @@
-package nl.lpdiy.consensus.node
+package nl.lpdiy.consensus.agent
 
-import nl.lpdiy.consensus.{ Message, Node, Environment }
+import nl.lpdiy.consensus.{ Message, Agent, Environment }
 
-class AddOneEachRound extends Node {
+class AddOneEachRound extends Agent {
 
   private var round = 0
   private var messages: List[Message] = Nil

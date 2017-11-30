@@ -1,8 +1,8 @@
-package nl.lpdiy.consensus.node
+package nl.lpdiy.consensus.agent
 
-import nl.lpdiy.consensus.{ Node, Environment, Message }
+import nl.lpdiy.consensus.{ Agent, Environment, Message }
 
-class CollectCompliantNode extends Node {
+class CollectCompliantAgent extends Agent {
 
   override def initialize(environment: Environment, initialMessages: Set[Message]): Unit = ???
 

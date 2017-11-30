@@ -2,49 +2,49 @@ package nl.lpdiy.consensus
 
 import java.util.Random
 
-case class SimulationRoundResult(numberOfNodes: Int, messages: Set[Message])
+case class SimulationRoundResult(numberOfAgents: Int, messages: Set[Message])
 
 class Simulation(
     randomGenerator:  Random,
-    numberOfNodes:    Int,
+    numberOfAgents:   Int,
     numberOfMessages: Int,
-    nodeBuilder:      SimulationNodeBuilder,
-    nodeConfig:       Environment
+    agentBuilder:     SimulationAgentBuilder,
+    agentConfig:      Environment
 ) {
 
-  private val nodes = (0 until numberOfNodes).map {
+  private val agents = (0 until numberOfAgents).map {
     _ → (
-      if (randomGenerator.nextDouble() > nodeConfig.erroneousNodeProbability) nodeBuilder.compliantNode() else nodeBuilder.erroneousNode()
+      if (randomGenerator.nextDouble() > agentConfig.erroneousAgentProbability) agentBuilder.compliantAgent() else agentBuilder.erroneousAgent()
     )
   }.toMap
 
   private val messages = (0 until numberOfMessages).map(_ ⇒ Message(randomGenerator.nextInt())).toSet
 
-  nodes.values.foreach {
+  agents.values.foreach {
     _.initialize(
-      nodeConfig,
-      messages.filter(_ ⇒ randomGenerator.nextDouble() < nodeConfig.initialMessageDistributionProbability)
+      agentConfig,
+      messages.filter(_ ⇒ randomGenerator.nextDouble() < agentConfig.initialMessageDistributionProbability)
     )
   }
 
   def next(): SimulationRoundResult = {
-    val nodeMessages = nodes.map { case (i, node) ⇒ i → node.send().intersect(messages) }
+    val agentMessages = agents.map { case (i, agent) ⇒ i → agent.send().intersect(messages) }
 
-    nodes.foreach {
-      case (i, node) ⇒ node.receive(
-        nodes.filter {
-          case (j, _) ⇒ i != j && randomGenerator.nextDouble() < nodeConfig.connectionProbability
+    agents.foreach {
+      case (i, agent) ⇒ agent.receive(
+        agents.filter {
+          case (j, _) ⇒ i != j && randomGenerator.nextDouble() < agentConfig.connectionProbability
         }.map {
-          case (j, _) ⇒ j → nodeMessages(j)
+          case (j, _) ⇒ j → agentMessages(j)
         }
       )
     }
 
-    consensusOf(nodes.values)
+    consensusOf(agents.values)
   }
 
-  private def consensusOf(nodes: Iterable[Node]): SimulationRoundResult = {
-    val counted = nodes.map(_.send().toList).filter(_.nonEmpty).groupBy(identity).toList.map {
+  private def consensusOf(agents: Iterable[Agent]): SimulationRoundResult = {
+    val counted = agents.map(_.send().toList).filter(_.nonEmpty).groupBy(identity).toList.map {
       case (k, l) ⇒ k → l.size
     }
 
@@ -58,4 +58,4 @@ class Simulation(
   }
 }
 
-class SimulationNodeBuilder(val compliantNode: () ⇒ Node, val erroneousNode: () ⇒ Node)
+class SimulationAgentBuilder(val compliantAgent: () ⇒ Agent, val erroneousAgent: () ⇒ Agent)
