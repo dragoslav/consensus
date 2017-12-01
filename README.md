@@ -27,7 +27,7 @@ Effectively probability of optimal consensus is lowered because not all messages
 Let's extend the algorithm: the first phase is already described (collecting all messages) and let's assume that this phase lasts for the first half of all rounds (first half of the time) and the following second phase lasts until the end (reduction phase).
 After an agent receives the set of messages from other agents:
 - the agent must decide to which agents in **this and only this** round it can trust (without blacklisting suspicious agents forever)
-- other agent is trustworthy only if set of messages sent by it is **similar** enough to set that this agent already has - e.g. intersection contains at least 90% of already collected messages
+- other agent is trustworthy only if set of messages sent by it is **similar** enough to set that this agent already has - e.g. size difference less than 10% and intersection contains at least 90% of already collected messages
 - the agent must remove any message (from collected set) that is not present in majority of sets of other **trustworthy** agents.
 
 Adjusting the previous simulation to use *Collect/Reduce* compliant agent, result is [this](https://dragoslav.github.io/consensus/?seed=0&rounds=10&nn=100&nm=500&cp=0.05&ep=0.3&mp=0.05&cn=1&en=2,3).
