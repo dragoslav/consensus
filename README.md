@@ -19,9 +19,9 @@ This project is inspired by [Bitcoin and Cryptocurrency Technologies Coursera co
 Let's imagine first that there are no malicious agents and there is no problem in communication:
 - agents broadcast initial set of messages
 - agents collect all messages they receive and in the following rounds send them all
-- consensus should be reached if there is enough number of rounds as in this (example)[https://dragoslav.github.io/consensus/?seed=0&rounds=10&nn=100&nm=500&cp=0.05&ep=0.3&mp=0.05&cn=0&en=]
+- consensus should be reached if there is enough number of rounds as in this [example](https://dragoslav.github.io/consensus/?seed=0&rounds=10&nn=100&nm=500&cp=0.05&ep=0.3&mp=0.05&cn=0&en=)
 
-Now let's introduce agents that may broadcast **new** messages each round - (example)[https://dragoslav.github.io/consensus/?seed=0&rounds=10&nn=100&nm=500&cp=0.05&ep=0.3&mp=0.05&cn=0&en=2,3].
+Now let's introduce agents that may broadcast **new** messages each round - [example](https://dragoslav.github.io/consensus/?seed=0&rounds=10&nn=100&nm=500&cp=0.05&ep=0.3&mp=0.05&cn=0&en=2,3).
 Effectively probability of optimal consensus is lowered because not all messages can be propagated to all agents.
 
 Let's extend the algorithm: the first phase is already described (collecting all messages) and let's assume that this phase lasts for the first half of all rounds (first half of the time) and the following second phase lasts until the end (reduction phase).
