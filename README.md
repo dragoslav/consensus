@@ -40,7 +40,7 @@ IMHO described solutions that achieve 100% score are too complicated - using for
 
 On the other hand this repo contains code for the [simulator](https://dragoslav.github.io/consensus/), erroneous agents (some examples) and optionally to run simulations from the command line.
 
-#### Blacklisting agents
+#### Blacklisting Agents
 
 In the original course assignment it is assumed that agents (nodes) can be either compliant or malicious.
 The common approach would be (according to the forum) to detect malicious agents and blacklist them forever (+ ignore all past/future messages from them etc.).
