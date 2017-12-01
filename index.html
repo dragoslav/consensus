@@ -5,6 +5,8 @@
     <title>Agent Consensus</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
           integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
 <style type="text/css">
     body {
@@ -21,6 +23,12 @@
     .row-brake {
         padding-top: 1.5rem;
     }
+    a, a:visited, a:hover, a:active {
+        color: inherit;
+    }
+    i {
+        padding-top: 2px;
+    }
 </style>
 <body>
 
@@ -29,7 +37,14 @@
     <div class="row">
         <div class="col-sm col-sm-4">
             <div class="row form-row">
-                <button type="button" class="btn btn-primary btn-block" id="buttonRun" disabled>Run Simulation</button>
+                <div class="col-sm col-sm-2">
+                    <a href="https://github.com/dragoslav/consensus">
+                        <i class="fa fa-github fa-2x" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <div class="col-sm col-sm-10">
+                    <button type="button" class="btn btn-primary btn-block" id="buttonRun" disabled>Run Simulation</button>
+                </div>
             </div>
             <div class="row form-row">
                 <div class="input-group" data-toggle="tooltip" data-placement="bottom"
@@ -88,7 +103,6 @@
                            aria-label="message %" aria-describedby="basic-addon7">
                 </div>
             </div>
-
             <div class="row form-row row-brake">
                 <div class="form-group col-12">
                     <label for="cn">Compliant Agent</label>
@@ -357,6 +371,7 @@
 
             run();
         });
+
 </script>
 
 </body>
