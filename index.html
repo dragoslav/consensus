@@ -2,9 +2,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Node Consensus</title>
+    <title>Agent Consensus</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
           integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
 <style type="text/css">
     body {
@@ -21,6 +23,12 @@
     .row-brake {
         padding-top: 1.5rem;
     }
+    a, a:visited, a:hover, a:active {
+        color: inherit;
+    }
+    i {
+        padding-top: 2px;
+    }
 </style>
 <body>
 
@@ -29,7 +37,14 @@
     <div class="row">
         <div class="col-sm col-sm-4">
             <div class="row form-row">
-                <button type="button" class="btn btn-primary btn-block" id="buttonRun" disabled>Run Simulation</button>
+                <div class="col-sm col-sm-2">
+                    <a href="https://github.com/dragoslav/consensus">
+                        <i class="fa fa-github fa-2x" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <div class="col-sm col-sm-10">
+                    <button type="button" class="btn btn-primary btn-block" id="buttonRun" disabled>Run Simulation</button>
+                </div>
             </div>
             <div class="row form-row">
                 <div class="input-group" data-toggle="tooltip" data-placement="bottom"
@@ -47,10 +62,10 @@
                 </div>
             </div>
             <div class="row form-row">
-                <div class="input-group" data-toggle="tooltip" data-placement="bottom" title="Total number of nodes.">
-                    <span class="input-group-addon col-6" id="basic-addon3"># nodes</span>
-                    <input type="number" class="form-control col-6" id="nn" placeholder="100" min="1" value="100"
-                           aria-label="# nodes" aria-describedby="basic-addon3">
+                <div class="input-group" data-toggle="tooltip" data-placement="bottom" title="Total number of agents.">
+                    <span class="input-group-addon col-6" id="basic-addon3"># agents</span>
+                    <input type="number" class="form-control col-6" id="na" placeholder="100" min="1" value="100"
+                           aria-label="# agents" aria-describedby="basic-addon3">
                 </div>
             </div>
             <div class="row form-row">
@@ -63,7 +78,7 @@
             </div>
             <div class="row form-row">
                 <div class="input-group" data-toggle="tooltip" data-placement="bottom"
-                     title="Probability of an edge between nodes.">
+                     title="Probability of an edge between agents.">
                     <span class="input-group-addon col-6" id="basic-addon5">connection %</span>
                     <input type="number" class="form-control col-6" id="cp" placeholder="0.1"
                            min="0.01" value="0.1" step="0.01" max="1"
@@ -72,7 +87,7 @@
             </div>
             <div class="row form-row">
                 <div class="input-group" data-toggle="tooltip" data-placement="bottom"
-                     title="Probability of an erroneous node.">
+                     title="Probability of an erroneous agent.">
                     <span class="input-group-addon col-6" id="basic-addon6">error %</span>
                     <input type="number" class="form-control col-6" id="ep" placeholder="0.3"
                            min="0" value="0.3" step="0.01" max="1"
@@ -81,18 +96,17 @@
             </div>
             <div class="row form-row">
                 <div class="input-group" data-toggle="tooltip" data-placement="bottom"
-                     title="Percentage of messages initially distributed per node.">
+                     title="Percentage of messages initially distributed per agent.">
                     <span class="input-group-addon col-6" id="basic-addon7">message %</span>
                     <input type="number" class="form-control col-6" id="mp"
                            placeholder="0.01" min="0.001" value="0.01" step="0.001" max="1"
                            aria-label="message %" aria-describedby="basic-addon7">
                 </div>
             </div>
-
             <div class="row form-row row-brake">
                 <div class="form-group col-12">
-                    <label for="cn">Compliant Node</label>
-                    <select id="cn" class="form-control" aria-label="compliant node">
+                    <label for="cn">Compliant Agent</label>
+                    <select id="cn" class="form-control" aria-label="compliant agent">
                         <option value="0">Collect Only</option>
                         <option value="1">Collect/Reduce</option>
                     </select>
@@ -100,7 +114,7 @@
             </div>
             <div class="row form-row">
                 <div class="form-group col-12">
-                    <label>Erroneous Nodes</label>
+                    <label>Erroneous Agents</label>
                     <div class="form-check">
                         <label class="form-check-label">
                             <input class="form-check-input" type="checkbox" id="en0">
@@ -121,7 +135,7 @@
                     </div>
                     <div class="form-check">
                         <label class="form-check-label">
-                            <input class="form-check-input" type="checkbox" id="en3" checked>
+                            <input class="form-check-input" type="checkbox" id="en3">
                             Flush at Finish
                         </label>
                     </div>
@@ -130,7 +144,7 @@
         </div>
         <div class="col-sm col-sm-8">
             <div class="row">
-                <canvas id="nodeCanvas"></canvas>
+                <canvas id="agentCanvas"></canvas>
             </div>
             <div class="row">
                 <canvas id="messageCanvas"></canvas>
@@ -206,11 +220,11 @@
         let currentRound;
         let running = false;
 
-        let nodeChartConfig = JSON.parse(JSON.stringify(config));
-        nodeChartConfig.data.datasets[0].label = '# Nodes with Consensus';
-        nodeChartConfig.data.datasets[0].borderColor = 'rgb(54, 162, 235)';
-        nodeChartConfig.data.datasets[0].backgroundColor = 'rgb(54, 162, 235)';
-        nodeChartConfig.options.scales.yAxes[0].scaleLabel.labelString = '# Nodes';
+        let agentChartConfig = JSON.parse(JSON.stringify(config));
+        agentChartConfig.data.datasets[0].label = '# Agents with Consensus';
+        agentChartConfig.data.datasets[0].borderColor = 'rgb(54, 162, 235)';
+        agentChartConfig.data.datasets[0].backgroundColor = 'rgb(54, 162, 235)';
+        agentChartConfig.options.scales.yAxes[0].scaleLabel.labelString = '# Agents';
 
         let messageChartConfig = JSON.parse(JSON.stringify(config));
         messageChartConfig.data.datasets[0].label = '# Consensus Messages';
@@ -221,34 +235,34 @@
         function run() {
             rndSeed = $('#seed').val() || Date.now();
             rounds = $('#rounds').val() || 10;
-            numberOfNodes = $('#nn').val() || 100;
+            numberOfAgents = $('#na').val() || 100;
             numberOfMessages = $('#nm').val() || 500;
             connectionProbability = $('#cp').val() || 0.1;
-            erroneousNodeProbability = $('#ep').val() || 0.3;
+            erroneousAgentProbability = $('#ep').val() || 0.3;
             initialMessageDistributionProbability = $('#mp').val() || 0.01;
-            compliantNode = $('#cn').val() || 0;
+            compliantAgent = $('#cn').val() || 0;
 
-            erroneousNodes = [];
+            erroneousAgents = [];
             for (let i = 0; i < 4; i++)
-                if ($('#en' + i).prop('checked')) erroneousNodes.push(i);
+                if ($('#en' + i).prop('checked')) erroneousAgents.push(i);
 
-            if (erroneousNodes.length === 0) erroneousNodeProbability = 0;
+            if (erroneousAgents.length === 0) erroneousAgentProbability = 0;
 
             currentRound = 0;
-            simulator = new JsSimulator(rndSeed, rounds, numberOfNodes, numberOfMessages, connectionProbability,
-                erroneousNodeProbability, initialMessageDistributionProbability, compliantNode, erroneousNodes);
+            simulator = new JsSimulator(rndSeed, rounds, numberOfAgents, numberOfMessages, connectionProbability,
+                erroneousAgentProbability, initialMessageDistributionProbability, compliantAgent, erroneousAgents);
 
-            nodeChartConfig.data.labels.length = 0;
+            agentChartConfig.data.labels.length = 0;
             messageChartConfig.data.labels.length = 0;
-            nodeChartConfig.data.datasets[0].data.length = 0;
+            agentChartConfig.data.datasets[0].data.length = 0;
             messageChartConfig.data.datasets[0].data.length = 0;
 
             for (let i = 1; i <= rounds; i++) {
-              nodeChartConfig.data.labels.push(i);
+              agentChartConfig.data.labels.push(i);
               messageChartConfig.data.labels.push(i);
             }
 
-            window.nodeChart.update(0);
+            window.agentChart.update(0);
             window.messageChart.update(0);
 
             running = true;
@@ -259,10 +273,10 @@
         function update() {
             setTimeout(function() {
                 let next = simulator.next();
-                nodeChartConfig.data.datasets[0].data.push(next[0]);
+                agentChartConfig.data.datasets[0].data.push(next[0]);
                 messageChartConfig.data.datasets[0].data.push(next[1]);
 
-                window.nodeChart.update(0);
+                window.agentChart.update(0);
                 window.messageChart.update(0);
 
                 if (currentRound++ <= rounds)
@@ -285,18 +299,18 @@
             let params = [];
             params.push('seed=' + $('#seed').val());
             params.push('rounds=' + $('#rounds').val());
-            params.push('nn=' + $('#nn').val());
+            params.push('na=' + $('#na').val());
             params.push('nm=' + $('#nm').val());
             params.push('cp=' + $('#cp').val());
             params.push('ep=' + $('#ep').val());
             params.push('mp=' + $('#mp').val());
             params.push('cn=' + $('#cn').val());
 
-            let erroneousNodes = [];
+            let erroneousAgents = [];
             for (let i = 0; i < 4; i++)
-                if ($('#en' + i).prop('checked')) erroneousNodes.push(i);
+                if ($('#en' + i).prop('checked')) erroneousAgents.push(i);
 
-            params.push('en=' + erroneousNodes.join(','));
+            params.push('en=' + erroneousAgents.join(','));
 
             if (JSON.stringify(history.state) !== JSON.stringify(params))
                 history.pushState(params, document.title, url + '?' + params.join('&'));
@@ -313,7 +327,7 @@
         }
 
         function updateConfiguration() {
-            ['seed', 'rounds', 'nn', 'nm', 'cp', 'ep', 'mp'].forEach(function(input) {
+            ['seed', 'rounds', 'na', 'nm', 'cp', 'ep', 'mp'].forEach(function(input) {
                 let formInput = $('#' + input);
                 formInput.on('input', function() {
                   let button = $('#buttonRun');
@@ -347,7 +361,7 @@
 
             updateConfiguration();
 
-            window.nodeChart = new Chart($('#nodeCanvas')[0].getContext("2d"), nodeChartConfig);
+            window.agentChart = new Chart($('#agentCanvas')[0].getContext("2d"), agentChartConfig);
             window.messageChart = new Chart($('#messageCanvas')[0].getContext("2d"), messageChartConfig);
 
             window.onpopstate = function(event) {
@@ -357,6 +371,7 @@
 
             run();
         });
+
 </script>
 
 </body>
